@@ -69,13 +69,14 @@ class LLMClient:
             except Exception as e:
                 # Fallback to normal chat on error
                 print(f"Tool selection failed: {e}")
-                return litellm.completion(
+                ll = litellm.completion(
                     model=self.model,
                     messages=messages,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                     **kwargs
                 ).choices[0].message.content
+                return ll
         else:
             # No tools registered → normal chat
             return litellm.completion(
