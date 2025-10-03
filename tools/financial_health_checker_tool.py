@@ -35,7 +35,7 @@ class FinancialHealthCheckerTool(Tool):
                     "additionalProperties": False                    
                 },
                 "strict": True
-            }
+            },
 
             # Calculate a net worth
             {
@@ -51,7 +51,7 @@ class FinancialHealthCheckerTool(Tool):
                     "additionalProperties": False                    
                 },
                 "strict": True
-            }
+            },
 
 
             # Calculate a liquidity ratio
@@ -68,7 +68,7 @@ class FinancialHealthCheckerTool(Tool):
                     "additionalProperties": False                    
                 },
                 "strict": True
-            }
+            },
 
             # Calculate a saving and investing ratio
             {
@@ -85,7 +85,7 @@ class FinancialHealthCheckerTool(Tool):
                     "additionalProperties": False                    
                 },
                 "strict": True
-            }
+            },
 
 
             # Calculate a financial freedom ratio
