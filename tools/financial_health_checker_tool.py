@@ -19,5 +19,84 @@ class FinancialHealthCheckerTool(Tool):
         return passive_income / expenses
 
     def get_schemas(self) -> list[dict]:
+        return [
+
+            {
+                "name": "cal_emergency_fund_ratio",
+                "description": "Calculate your emergency fund ratio",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "current_assets": {"type": "number"},
+                        "monthly_nondiscreationary_expenses": {"type": "number"}
+                    },
+                    "required": ["current_assets", "monthly_nondiscreationary_expenses"],
+                    "additionalProperties": False                    
+                },
+                "strict": True
+            }
+
+            {
+                "name": "cal_net_worth",
+                "description": "Calculate your net worth",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "assets": {"type": "number"},
+                        "liabilities": {"type": "number"}
+                    },
+                    "required": ["assets", "liabilities"],
+                    "additionalProperties": False                    
+                },
+                "strict": True
+            }
+
+            {
+                "name": "cal_liquidity_ratio",
+                "description": "Calculate your liquidity ratio",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "current_assets": {"type": "number"},
+                        "current_liabilities": {"type": "number"}
+                    },
+                    "required": ["current_assets", "current_liabilities"],
+                    "additionalProperties": False                    
+                },
+                "strict": True
+            }
+
+            {
+                "name": "cal_saving_and_investing_ratio",
+                "description": "Calculate your saving and investing ratio",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "savings": {"type": "number"},
+                        "investments": {"type": "number"},
+                        "monthly_income": {"type": "number"}
+                    },
+                    "required": ["savings", "investments", "monthly_income"],
+                    "additionalProperties": False                    
+                },
+                "strict": True
+            }
+
+            {
+                "name": "cal_financial_freedom_ratio",
+                "description": "Calculate your financial freedom ratio",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "passive_income": {"type": "number"},
+                        "expenses": {"type": "number"}
+                    },
+                    "required": ["passive_income", "expenses"],
+                    "additionalProperties": False                    
+                },
+                "strict": True
+            }
+
+        ]
         pass
     pass
