@@ -14,7 +14,7 @@ class LLMClient:
     """Wrapper class for LiteLLM operations"""
 
 
-    def __init__(self, model: Optional[str], temperature=0.7, max_tokens=1000):
+    def __init__(self, model: Optional[str] = None, temperature=0.7, max_tokens=1000):
         self.model = model or os.getenv("DEFAULT_MODEL", "gpt-3.5-turbo")
         self.temperature = temperature
         self.max_tokens = max_tokens
