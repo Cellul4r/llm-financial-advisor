@@ -21,6 +21,7 @@ class FinancialHealthCheckerTool(Tool):
     def get_schemas(self) -> list[dict]:
         return [
 
+            # Calculate an emergency fund ratio
             {
                 "name": "cal_emergency_fund_ratio",
                 "description": "Calculate your emergency fund ratio",
@@ -36,6 +37,7 @@ class FinancialHealthCheckerTool(Tool):
                 "strict": True
             }
 
+            # Calculate a net worth
             {
                 "name": "cal_net_worth",
                 "description": "Calculate your net worth",
@@ -51,6 +53,8 @@ class FinancialHealthCheckerTool(Tool):
                 "strict": True
             }
 
+
+            # Calculate a liquidity ratio
             {
                 "name": "cal_liquidity_ratio",
                 "description": "Calculate your liquidity ratio",
@@ -66,6 +70,7 @@ class FinancialHealthCheckerTool(Tool):
                 "strict": True
             }
 
+            # Calculate a saving and investing ratio
             {
                 "name": "cal_saving_and_investing_ratio",
                 "description": "Calculate your saving and investing ratio",
@@ -82,6 +87,8 @@ class FinancialHealthCheckerTool(Tool):
                 "strict": True
             }
 
+
+            # Calculate a financial freedom ratio
             {
                 "name": "cal_financial_freedom_ratio",
                 "description": "Calculate your financial freedom ratio",
@@ -98,5 +105,3 @@ class FinancialHealthCheckerTool(Tool):
             }
 
         ]
-        pass
-    pass
