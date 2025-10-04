@@ -18,14 +18,7 @@
 
 1. **Install dependencies:**
    ```bash
-<<<<<<< HEAD
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install litellm python-dotenv
-   pip install -r requirements.txt
-=======
         source start.sh
->>>>>>> 436d2fcb6e89e17faca58b160c65d3b36a307132
    ```
 ## Git Flow & Commands
 
