@@ -7,6 +7,7 @@ import litellm
 import json
 from dotenv import load_dotenv 
 from tools.tool import Tool, ToolCall
+from utils.tool_executor import ToolExecutor
 
 # Load environment variables
 load_dotenv()
@@ -15,31 +16,14 @@ class LLMClient:
     """Wrapper class for LiteLLM operations"""
 
 
-    def __init__(self, model: Optional[str] = None, temperature=0.7, max_tokens=1000):
+    def __init__(self, model: Optional[str] = None, tool_executor: ToolExecutor = ToolExecutor(), 
+                 temperature=0.7, max_tokens=1000):
         self.model = model or os.getenv("DEFAULT_MODEL", "gpt-3.5-turbo")
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-        # set tool schemas and functions
-        self.tools: dict[str, callable] = {}
-        self.tool_schemas: list[dict] = []
-
-    # --- Tool registration ---
-    def register_tool(self, name: str, func: callable, schema: dict):
-        self.tools[name] = func
-        self.tool_schemas.append(schema)
-
-    def register_tools(self, tool_obj: Tool):
-        for schema in getattr(tool_obj, "get_schemas", lambda: [])():
-            name = schema["name"]
-            if hasattr(tool_obj, name):
-                self.register_tool(name, getattr(tool_obj, name), schema)
-
-    # --- Tool execution ---
-    def run_tool(self, name: str, **kwargs):
-        if name not in self.tools:
-            raise ValueError(f"Tool {name} not registered")
-        return self.tools[name](**kwargs)
+        # set tool executor for tool selection
+        self.tool_executor: ToolExecutor = tool_executor
 
     # --- Chat with optional tool selection ---
     def completion_chat(self, messages: list[Dict[str, str]], **kwargs) -> str:
@@ -73,45 +57,40 @@ class LLMClient:
                         "complete the user's instruction in one natural, clear message."
                     })
         
-        if self.tools and self.tool_schemas:
-            try:
-                for turn in range(1, max_turns + 1):
-                    print(f"\n=== TURN {turn} === \n{messages}")
-                    resp = litellm.completion(
-                        model=self.model, 
-                        messages=messages, 
-                        functions=self.tool_schemas, 
-                        function_call="auto",
-                        temperature=0.2,
-                    )
+        try:
+            for turn in range(1, max_turns + 1):
+                #print(f"\n=== TURN {turn} === \n{messages}")
+                resp = litellm.completion(
+                    model=self.model, 
+                    messages=messages, 
+                    functions=self.tool_executor.tool_schemas, 
+                    function_call="auto",
+                    temperature=0.2,
+                )
 
-                    msg = resp.choices[0].message
-                    print("LLM response:", msg)
-                    fc: ToolCall | None = getattr(msg, "function_call", None)
-                    if not fc:
-                        return getattr(msg, "content", None) or msg.get("content")
-                    # INTERMEDIATE print
-                    print(f"=== INTERMEDIATE (turn {turn}) ===")
-                    print("name:", getattr(fc, "name", None))
-                    print("arguments:", getattr(fc, "arguments", None))
+                msg = resp.choices[0].message
+                #print("LLM response:", msg)
+                fc: ToolCall | None = getattr(msg, "function_call", None)
+                if not fc:
+                    return getattr(msg, "content", None) or msg.get("content")
+                # INTERMEDIATE print
+                print(f"=== INTERMEDIATE (turn {turn}) ===")
+                print("name:", getattr(fc, "name", None))
+                print("arguments:", getattr(fc, "arguments", None))
 
-                    # Execute tool
-                    try:
-                        args = json.loads(getattr(fc, "arguments", "{}") or "{}")
-                        name = getattr(fc, "name", None)
-                        result = self.run_tool(name, **args)
-                        result = self.tools[name](**args) if args else self.tools[name]()
-                    except Exception as e:
-                        result = {"error": str(e)}
-                    # Return result
-                    messages.append({"role": "assistant", "content": None, "function_call": {"name": getattr(fc, "name", None), "arguments": getattr(fc, "arguments", "{}")}})
-                    messages.append({"role": "function", "name": getattr(fc, "name", None), "content": json.dumps(result)})
-            except Exception as e:
-                # Fallback to normal chat on error
-                print(f"Tool selection failed: {e}")
-                return self.completion_chat(messages, **kwargs)
-        else:
-            # No tools registered → normal chat
+                # Execute tool
+                try:
+                    args = json.loads(getattr(fc, "arguments", "{}") or "{}")
+                    name = getattr(fc, "name", None)
+                    result = self.tool_executor.run_tool(name, **args)
+                except Exception as e:
+                    result = {"error": str(e)}
+                # Return result
+                messages.append({"role": "assistant", "content": None, "function_call": {"name": getattr(fc, "name", None), "arguments": getattr(fc, "arguments", "{}")}})
+                messages.append({"role": "function", "name": getattr(fc, "name", None), "content": json.dumps(result)})
+        except Exception as e:
+            # Fallback to normal chat on error
+            print(f"Tool selection failed: {e}")
             return self.completion_chat(messages, **kwargs)
 
 def get_available_models() -> List[str]:
