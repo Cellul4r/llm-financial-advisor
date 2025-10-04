@@ -20,13 +20,6 @@
    ```bash
         source start.sh
    ```
-2. **Environment setup:**
-   - Copy the example environment file:
-     ```bash
-     cp .venv/.env.example .venv/.env
-     ```
-   - **Important:** Never push `.env` files to the repository. Add `.env` to your `.gitignore` if not already present.
-
 ## Git Flow & Commands
 
 - **Branching:**
