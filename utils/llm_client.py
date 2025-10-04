@@ -81,6 +81,8 @@ class LLMClient:
                 # Execute tool
                 try:
                     args = json.loads(getattr(fc, "arguments", "{}") or "{}")
+                    if args is None:
+                        args = {}
                     name = getattr(fc, "name", None)
                     result = self.tool_executor.run_tool(name, **args)
                 except Exception as e:
