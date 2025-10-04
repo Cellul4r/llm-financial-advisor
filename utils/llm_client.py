@@ -52,10 +52,19 @@ class LLMClient:
     def chat_with_tool(self, messages: list[Dict[str, str]], max_turns: int = 10, **kwargs) -> str:
         # Use LLM function_call if tools exist
         messages.append({
-                        "role": "system",
-                        "content": "After you have received results from tools. Now summarize all tool outputs and "
-                        "complete the user's instruction in one natural, clear message."
-                    })
+            "role": "system",
+            "content": (
+                "You are a professional financial advisor. "
+                "Your job is to analyze the user's financial situation or question and provide clear, structured, and practical advice. "
+                "Follow these steps in your answers:\n"
+                "1. Restate or clarify the user's goal or question.\n"
+                "2. Analyze the situation step by step, including any necessary calculations (e.g., interest, loan payments, investment returns).\n"
+                "3. Provide a concise summary of the analysis.\n"
+                "4. Give practical recommendations, including potential options, trade-offs, and risks.\n"
+                "Use clear, simple language suitable for non-experts. Avoid unnecessary jargon. "
+                "Always ensure financial advice is general and educational, not personalized legal or investment advice."
+            )
+        })
         
         try:
             for turn in range(1, max_turns + 1):
