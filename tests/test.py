@@ -14,4 +14,4 @@ def test_tool(tool_executor: ToolExecutor,values: list[str]) -> None:
 # currency_tool = CurrencyTools()
 # tool_executor.register_tools(currency_tool)
 
-# test_tool(tool_executor, msg2)
+# test_tool(tool_executor, msg1)
