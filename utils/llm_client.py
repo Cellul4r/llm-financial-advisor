@@ -59,7 +59,6 @@ class LLMClient:
                 "1. Restate or clarify the user's goal/question shortly.\n"
                 "2. Analyze step by step, including any calculations needed (e.g., interest, loan payments, investment returns).\n"
                 "3. Summarize the findings clearly.\n"
-                "4. Give practical, balanced recommendations (options, trade-offs, risks).\n"
                 "Use simple, clear language suitable for non-experts. Keep responses structured, concise, and educational—never provide personalized legal or investment advice."
             )
         })
