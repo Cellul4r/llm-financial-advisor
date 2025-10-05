@@ -150,8 +150,8 @@ class FinancialInstitutionTool(Tool):
                     "Get the bank(s) offering the best interest rate for a given fixed deposit type. "
                     "The 'deposit_type' parameter can be provided either in code form (e.g. 'fixed_12m') "
                     "or in natural language (e.g. '12 month fixed deposit'). "
-                    "If the input is not already formatted, call 'resolve_deposit' so it becomes formatted like in deposit_type."),
-                "parameters": {
+                    "If the input is not already formatted, call 'resolve_deposit' to normalize it before comparing rates."),
+                "parameters": { 
                     "type": "object",
                     "properties": {
                         "deposit_type": {"type": "string"}
