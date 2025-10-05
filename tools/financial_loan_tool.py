@@ -61,7 +61,8 @@ class FinancialLoanTool(Tool):
 
         return {
             "total_interest": round(total_interest, 2),
-            "total_paid": round(total_paid, 2)
+            "total_paid": round(total_paid, 2),
+
         }
 
     
@@ -69,33 +70,37 @@ class FinancialLoanTool(Tool):
         bank1_name = plan1.get("bank") or "Plan 1"
         bank2_name = plan2.get("bank") or "Plan 2"
 
-        result1 = self.calculate_total_interest(
-            plan1["loan_amount"], plan1["interest_rate"], plan1["years"]
+        result1 = self.cal_total_interest(
+            plan1["loan_amount"], plan1["interest_rate"], plan1["years"], plan1["rate_type"]
         )
-        result2 = self.calculate_total_interest(
-            plan2["loan_amount"], plan2["interest_rate"], plan2["years"]
+        result2 = self.cal_total_interest(
+            plan2["loan_amount"], plan2["interest_rate"], plan2["years"], plan2["rate_type"]
         )
-
+        print(result1)
+        print(result2)
         better_bank = bank1_name if result1["total_paid"] < result2["total_paid"] else bank2_name
 
         return {
             "plan1": {
                 "name": bank1_name,
-                **result1
+                "p1"  : result1,
+                "rate_type": plan1["rate_type"],
+                "loan_amount": plan1["loan_amount"]
             },
             "plan2": {
                 "name": bank2_name,
-                **result2
+                "p2" :result2,
+                "rate_type": plan2["rate_type"],
+                "loan_amount": plan2["loan_amount"]
             },
-            "better_plan": better_bank
+            "better_plan": better_bank,
         }
 
     def get_schemas(self) -> list[dict]:
             return [
                 {
                     "name": "cal_monthly_payment",
-                    "description": """Calculate the monthly payment for a loan. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective'"
-                    or car/personal loan usually be "flat"). The bank name is optional.""",
+                    "description": "Compare loan offers from two plans or banks. Bank name is optional for both. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective' or car/personal loan usually be 'flat'). The bank name is optional.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -111,7 +116,7 @@ class FinancialLoanTool(Tool):
                 },
                 {
                     "name": "cal_total_interest",
-                    "description": "Calculate the total interest and total amount paid over the full term of the loan. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective' or car/personal loan usually be 'flat'). The bank name is optional.",
+                    "description": "Compare loan offers from two plans or banks. Bank name is optional for both. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective' or car/personal loan usually be 'flat'). The bank name is optional.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -125,7 +130,8 @@ class FinancialLoanTool(Tool):
                 },
                 {
                     "name": "compare_loan_plans",
-                    "description": "Compare loan offers from two plans or banks. Bank name is optional for both.",
+                    "description": "Compare loan offers from two plans or banks. Bank name is optional for both. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective' or car/personal loan usually be 'flat'). The bank name is optional."
+                                    "If both plans/banks don't give rate type, assume they have the same rate type for both",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -135,9 +141,10 @@ class FinancialLoanTool(Tool):
                                     "bank": {"type": "string", "description": "Optional name of the first bank."},
                                     "loan_amount": {"type": "number"},
                                     "interest_rate": {"type": "number"},
-                                    "years": {"type": "integer"}
+                                    "years": {"type": "integer"},
+                                    "rate_type": {"type": "string"}
                                 },
-                                "required": ["loan_amount", "interest_rate", "years"]
+                                "required": ["loan_amount", "interest_rate", "years","rate_type"]
                             },
                             "plan2": {
                                 "type": "object",
@@ -145,9 +152,10 @@ class FinancialLoanTool(Tool):
                                     "bank": {"type": "string", "description": "Optional name of the second bank."},
                                     "loan_amount": {"type": "number"},
                                     "interest_rate": {"type": "number"},
-                                    "years": {"type": "integer"}
+                                    "years": {"type": "integer"},
+                                    "rate_type": {"type": "string"}
                                 },
-                                "required": ["loan_amount", "interest_rate", "years"]
+                                "required": ["loan_amount", "interest_rate", "years","rate_type"]
                             }
                         },
                         "required": ["plan1", "plan2"]
