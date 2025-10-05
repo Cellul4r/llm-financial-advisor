@@ -42,24 +42,28 @@ class FinancialLoanTool(Tool):
         return result
 
 
-    '''
-    
-    def cal_total_interest(self, loan_amount: float, interest_rate: float, years: int):
-        monthly_payment = self.calculate_monthly_payment(
-            loan_amount=loan_amount,
-            interest_rate=interest_rate,
-            years=years
-        )["monthly_payment"]
+    def cal_total_interest(self, loan_amount: float, interest_rate: float, years: int, rate_type: str = "effective"):
+        if rate_type == "flat":
+            # Total interest for flat = P × r × t
+            total_interest = loan_amount * (interest_rate / 100) * years
+            total_paid = loan_amount + total_interest
+            monthly_payment = total_paid / (years * 12)
+        else:
+            # Effective (reducing balance)
+            monthly_payment = self.cal_monthly_payment(
+                loan_amount=loan_amount,
+                interest_rate=interest_rate,
+                years=years,
+                rate_type="effective"
+            )["monthly_payment"]
+            total_paid = monthly_payment * years * 12
+            total_interest = total_paid - loan_amount
 
-        total_paid = monthly_payment * years * 12
-        total_interest = total_paid - loan_amount
         return {
-            "monthly_payment": monthly_payment,
             "total_interest": round(total_interest, 2),
             "total_paid": round(total_paid, 2)
         }
-    
-    '''
+
     
     def compare_loan_plans(self, plan1: dict, plan2: dict):
         bank1_name = plan1.get("bank") or "Plan 1"
@@ -107,13 +111,14 @@ class FinancialLoanTool(Tool):
                 },
                 {
                     "name": "cal_total_interest",
-                    "description": "Calculate the total interest and total amount paid over the full term of the loan.",
+                    "description": "Calculate the total interest and total amount paid over the full term of the loan. If the rate type (string) is not provided, infer the most likely one from user context (e.g., home loans usually use 'effective' or car/personal loan usually be 'flat'). The bank name is optional.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "loan_amount": {"type": "number"},
                             "interest_rate": {"type": "number"},
-                            "years": {"type": "integer"}
+                            "years": {"type": "integer"},
+                            "rate_type": {"type": "string"}
                         },
                         "required": ["loan_amount", "interest_rate", "years"]
                     }
