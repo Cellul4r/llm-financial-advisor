@@ -71,11 +71,12 @@ class LLMClient:
                     messages=messages, 
                     functions=self.tool_executor.tool_schemas, 
                     function_call="auto",
-                    temperature=0.2,
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
                 )
 
                 msg = resp.choices[0].message
-                #print("LLM response:", msg)
+                # print("LLM response:", msg)
                 fc: ToolCall | None = getattr(msg, "function_call", None)
                 if not fc:
                     return getattr(msg, "content", None) or msg.get("content")
