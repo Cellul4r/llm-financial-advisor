@@ -54,7 +54,7 @@ class LLMClient:
         messages.append({
                         "role": "system",
                         "content": "After you have received results from tools. Now summarize all tool outputs and "
-                        "complete the user's instruction in one natural, clear message."
+                        "complete the user's instruction in one natural, clear message if can not select any tool or don't use answer to response please use chat completion instead"
                     })
         
         try:
