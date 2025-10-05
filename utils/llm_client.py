@@ -71,7 +71,8 @@ class LLMClient:
                     messages=messages, 
                     functions=self.tool_executor.tool_schemas, 
                     function_call="auto",
-                    temperature=0.2,
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
                 )
 
                 msg = resp.choices[0].message
