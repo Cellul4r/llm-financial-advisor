@@ -11,8 +11,14 @@ class TaxCalculatorTool(Tool):
         progessive_tax = self.calculate_progressive_tax(income, expenses, deductions)
 
         return {
-            "description": """Finally The tax has 2 type flat and progressive tax use the 
-            one with the higher value. If which one is zero tell user that get exception for that type of tax""",
+            "description": """"This function calculates personal income tax according to the Thai tax system. "
+            "There are two methods: flat tax and progressive tax. "
+            "The progressive tax is calculated based on Thailand’s progressive income tax brackets, "
+            "which apply increasing tax rates to different portions of taxable income after "
+            "deducting allowable expenses and deductions. The flat tax is based on a fixed rate "
+            "applied to income plus salary. The final tax amount is determined by taking the "
+            "higher of the two calculated taxes. If one of the tax types is zero, it indicates "
+            "that the taxpayer is exempt from that tax type.""",
             "flat_tax": flat_tax,
             "progressive tax": progessive_tax,
             "income": income,
