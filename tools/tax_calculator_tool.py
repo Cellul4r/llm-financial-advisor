@@ -5,9 +5,27 @@ class TaxCalculatorTool(Tool):
     def __init__(self):
         pass
     
+    def calculate_tax(self, income: float, expenses: float, 
+                      salary_per_month: float = 0.0, deductions: float = 0.0) -> dict[str, any]:
+        flat_tax = self.calculate_flat_tax(income, salary_per_month)
+        progessive_tax = self.calculate_progressive_tax(income, expenses, deductions)
+
+        return {
+            "description": """Finally The tax has 2 type flat and progressive tax use the 
+            one with the higher value. If which one is zero tell user that get exception for that type of tax""",
+            "flat_tax": flat_tax,
+            "progressive tax": progessive_tax,
+            "income": income,
+            "expenses": expenses,
+            "deductions": deductions,
+            "salary_per_month": salary_per_month,
+        }
+    
     def calculate_flat_tax(self, income: float, salary_per_month: float) -> float:
         tax_rate = 0.5 / 100 # 5% tax rate
         tax = (income - (salary_per_month * 12)) * tax_rate
+        if tax <= 5000:
+            tax = 0
         return tax
 
     def calculate_progressive_tax(self, income: float, expenses: float, deductions: float = 0.0) -> float:
@@ -64,4 +82,32 @@ class TaxCalculatorTool(Tool):
 
     @classmethod
     def get_schemas(self) -> list[dict]:
-        pass
+        return [
+            {
+                "name": "calculate_tax",
+                "description": "Calculate the Thai personal tax based on income, expenses, salary per month, and deductions.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "income": {
+                            "type": "number",
+                            "description": "The income amount.",
+                        },
+                        "expenses": {
+                            "type": "number",
+                            "description": "The total expenses amount.",
+                        },
+                        "salary_per_month": {
+                            "type": "number",
+                            "description": "The salary per month amount. Default is 0.0.",
+                        },
+                        "deductions": {
+                            "type": "number",
+                            "description": "The total deductions amount. Default is 0.0.",
+                        },
+                    },
+                    "required": ["income", "expenses"],
+                    "additionalProperties": False
+                }
+            }
+        ]
