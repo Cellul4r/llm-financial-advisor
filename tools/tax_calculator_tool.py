@@ -5,7 +5,12 @@ class TaxCalculatorTool(Tool):
     def __init__(self):
         pass
     
-    def calculate_progressive_tax(self, income: float, expenses: float, deductions: float = 0.0) -> dict[str, any]:
+    def calculate_flat_tax(self, income: float, salary_per_month: float) -> float:
+        tax_rate = 0.5 / 100 # 5% tax rate
+        tax = (income - (salary_per_month * 12)) * tax_rate
+        return tax
+
+    def calculate_progressive_tax(self, income: float, expenses: float, deductions: float = 0.0) -> float:
         """
         Calculate the Thai progessive tax based on income, expenses, and deductions.
 
