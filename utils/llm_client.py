@@ -25,6 +25,20 @@ class LLMClient:
         # set tool executor for tool selection
         self.tool_executor: ToolExecutor = tool_executor
 
+        # Set API keys
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key:
+            os.environ["OPENAI_API_KEY"] = openai_key
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        if anthropic_key:
+            os.environ["ANTHROPIC_API_KEY"] = anthropic_key
+        google_key = os.getenv("GOOGLE_API_KEY")
+        if google_key:
+            os.environ["GOOGLE_API_KEY"] = google_key
+        groq_key = os.getenv("GROQ_API_KEY")
+        if groq_key:
+            os.environ["GROQ_API_KEY"] = groq_key
+
     # --- Chat with optional tool selection ---
     def completion_chat(self, messages: list[Dict[str, str]], **kwargs) -> str:
         """
@@ -105,9 +119,9 @@ class LLMClient:
 def get_available_models() -> List[str]:
     """Get list of available models"""
     return [
-        "gpt-3.5-turbo",
-        "gpt-4",
-        "gpt-4-turbo-preview",
+        # "gpt-3.5-turbo",
+        # "gpt-4",
+        # "gpt-4-turbo-preview",
         #"claude-3-sonnet-20240229",
         #"claude-3-haiku-20240307",
         #"gemini-pro",
