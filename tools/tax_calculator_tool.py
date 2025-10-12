@@ -5,10 +5,14 @@ class TaxCalculatorTool(Tool):
     def __init__(self):
         pass
     
-    def calculate_tax(self, income: float, expenses: float, 
+    def calculate_tax(self, income: float, income_sources: list[str] = [],
                       salary_per_month: float = 0.0, deductions: float = 0.0) -> dict[str, any]:
+        # basic tax calculation for Thai tax system with normal salary income
+        print(income_sources)
+        # basic income reduction 50% of income (max 100,000 THB)
+        income_reduced = income - min(income * 0.5, 100_000)
         flat_tax = self.calculate_flat_tax(income, salary_per_month)
-        progessive_tax = self.calculate_progressive_tax(income, expenses, deductions)
+        progessive_tax = self.calculate_progressive_tax(income_reduced)
 
         return {
             "description": """"This function calculates personal income tax according to the Thai tax system. "
@@ -18,11 +22,11 @@ class TaxCalculatorTool(Tool):
             "deducting allowable expenses and deductions. The flat tax is based on a fixed rate "
             "applied to income plus salary. The final tax amount is determined by taking the "
             "higher of the two calculated taxes. If one of the tax types is zero, it indicates "
-            "that the taxpayer is exempt from that tax type.""",
+            "that the taxpayer is exempt from that tax type.
+            reference tax calculator program: https://www.kasikornbank.com/th/tax/pages/calculate_tax.aspx""",
             "flat_tax": flat_tax,
             "progressive tax": progessive_tax,
             "income": income,
-            "expenses": expenses,
             "deductions": deductions,
             "salary_per_month": salary_per_month,
         }
@@ -34,20 +38,13 @@ class TaxCalculatorTool(Tool):
             tax = 0
         return tax
 
-    def calculate_progressive_tax(self, income: float, expenses: float, deductions: float = 0.0) -> float:
+    def calculate_progressive_tax(self, net_income: float) -> float:
         """
         Calculate the Thai progessive tax based on income, expenses, and deductions.
 
         Args:
-            income (float): The income amount.
-            expenses (float): The total expenses amount.
-            deductions (float): The total deductions amount."""
-        
-        net_income = income - expenses - deductions
-        if net_income < 0:
-            return {
-                "error": "Net income is negative, Your expenses is more than your income. no tax applicable."
-            }
+            net income (float): The total net income amount after deductions.
+        """
         
         if net_income >= 5_000_001:
             tax_rate = 0.35
@@ -97,11 +94,13 @@ class TaxCalculatorTool(Tool):
                     "properties": {
                         "income": {
                             "type": "number",
-                            "description": "The income amount.",
+                            "description": "Total income from all sources eg. Sum of salry, bonus, freelance, etc.",
                         },
-                        "expenses": {
-                            "type": "number",
-                            "description": "The total expenses amount.",
+                        "income_sources": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "salary_per_month": {
                             "type": "number",
@@ -112,7 +111,7 @@ class TaxCalculatorTool(Tool):
                             "description": "The total deductions amount. Default is 0.0.",
                         },
                     },
-                    "required": ["income", "expenses"],
+                    "required": ["income"],
                     "additionalProperties": False
                 }
             }
