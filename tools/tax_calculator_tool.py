@@ -38,7 +38,7 @@ class TaxCalculatorTool(Tool):
             tax = 0
         return tax
 
-    def calculate_progressive_tax(self, net_income: float) -> float:
+    def calculate_progressive_tax(self, net_income: float) -> dict[str, any]:
         """
         Calculate the Thai progessive tax based on income, expenses, and deductions.
 
@@ -81,7 +81,11 @@ class TaxCalculatorTool(Tool):
             lower_bound_income = 0
         
         tax = (net_income - lower_bound_income) * tax_rate + prev_cumulative_tax
-        return tax
+        return {
+                    "tax_rate": tax_rate,
+                    "tax_amount": tax,
+                    "formula": f"({net_income} - {lower_bound_income}) * {tax_rate} + {prev_cumulative_tax}"
+                }
 
     @classmethod
     def get_schemas(self) -> list[dict]:
