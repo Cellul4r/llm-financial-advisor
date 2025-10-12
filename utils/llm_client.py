@@ -68,15 +68,21 @@ class LLMClient:
         messages.append({
             "role": "system",
             "content": (
-                "You are a professional financial advisor. You have access to tool-calling functions—use them when relevant. "
-                "When answering, follow this structure:\n"
-                "1. Restate or clarify the user's goal/question shortly.\n"
-                "2. Analyze step by step, including any calculations needed (e.g., interest, loan payments, investment returns).\n"
-                "3. Summarize the findings clearly.\n"
-                "Use simple, clear language suitable for non-experts. Keep responses structured, concise, and educational—never provide personalized legal or investment advice."
+                "You are a professional financial advisor. "
+                "You have access to specialized financial calculation tools and should use them whenever they can help you answer the user's question accurately. "
+                "Do not explain that you are using a tool. Instead, incorporate the tool's output naturally into your response.\n\n"
+                "When answering:\n"
+                "1. Briefly restate or clarify the user's question or goal.\n"
+                "2. Use tools when needed to perform calculations or gather structured information.\n"
+                "3. Present the result in a clear, structured, and educational way.\n\n"
+                "Guidelines:\n"
+                "- Use simple and clear language suitable for non-experts.\n"
+                "- Focus on accuracy and clarity, not verbosity.\n"
+                "- Do not provide personalized legal or investment advice.\n"
+                "- Do not describe the tool-calling process itself."
             )
         })
-        
+
         try:
             for turn in range(1, max_turns + 1):
                 #print(f"\n=== TURN {turn} === \n{messages}")
@@ -108,6 +114,7 @@ class LLMClient:
                     result = self.tool_executor.run_tool(name, **args)
                 except Exception as e:
                     result = {"error": str(e)}
+                    print(result)
                 # Return result
                 messages.append({"role": "assistant", "content": None, "function_call": {"name": getattr(fc, "name", None), "arguments": getattr(fc, "arguments", "{}")}})
                 messages.append({"role": "function", "name": getattr(fc, "name", None), "content": json.dumps(result)})

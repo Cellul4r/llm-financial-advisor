@@ -21,6 +21,7 @@ from tools.financial_institution_tool import FinancialInstitutionTool
 from tools.financial_loan_tool import FinancialLoanTool
 from tools.investment_saving_tool import InvestmentSavingTool
 from tools.investment_saving_tool import RiskOfInvestment
+from tools.tax_calculator_tool import TaxCalculatorTool
 from pathlib import Path
 import base64
 
@@ -31,7 +32,7 @@ tool_executor.register_tools(FinancialInstitutionTool())
 tool_executor.register_tools(FinancialLoanTool())
 tool_executor.register_tools(InvestmentSavingTool())
 tool_executor.register_tools(RiskOfInvestment())
-
+tool_executor.register_tools(TaxCalculatorTool())
 
 def init_session_state():
     """Initialize session state variables"""
