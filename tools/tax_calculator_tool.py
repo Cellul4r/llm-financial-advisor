@@ -2,15 +2,49 @@ from tools.tool import Tool
 
 class TaxCalculatorTool(Tool):
 
+    deduction_information = """
+            Standard deductions in Thailand include:
+                1. (personal_allowance) Personal allowance : 60,000 THB
+                2. (father_and_mother_deduction) father and mother deduction : 30,000 baht per person (parents must be over 60 years old and have an income not exceeding 30,000 baht per year) (both parents and spouse's parents)
+                3. (disabled_tax_deduction) Disabled or handicapped tax deductions (father/mother, spouse's father/mother, spouse, children): 60,000 baht per person
+                If others you are caring for are disabled or handicapped, you can only claim an additional 60,000 baht (1 person maximum).
+                4. (child_deduction) If you have first children: 30,000 baht 
+                5. (provident_fund) Provident Fund (PVD): up to 15%% of your monthly salary, but not exceeding 500,000 baht per year.
+                6. (social_security_fund) Social Security Fund: up to 9,000 baht per year.
+                7. (hoam_loan_interest) Hoam Loan Interest: up to 100,000 baht per year.
+                8. (life_insurance_premium) Life Insurance Premium: up to 100,000 baht per year.
+                9. (personal_health_insurance_premium) Personal Health Insurance Premium: up to 25,000 baht per year.
+                Life insurance and health insurance premiums combined must not exceed 100,000 baht.
+                10. (parent_health_insurance_premium) Parent Health Insurance Premium: up to 15,000 baht per year.
+                11. (pension_insurance_premiums) Pension insurance premiums: Not to exceed 15%% of annual income, not exceeding 200,000 baht. 
+                If not using general life insurance, the total can be combined up to 300,000 baht, and combined with other funds, not to exceed 500,000 baht.
+                12. (government_pension_fund) Government Pension Fund (GPF): Not exceeding 15%% of annual income and combined with other funds not exceeding 500,000 baht.
+                13. (national_savings_fund) National Savings Fund (NSF): Not exceeding 13,200 baht per year.
+                14. (private_teacher_fund) Private Teachers Fund: Not exceeding 15%% of the total annual income and combined with other funds and pension insurance premiums, not exceeding 500,000 baht.
+                *** Donations deduction calculate after other deductions. ***
+                15. (special_donation) Donations for education, sports, social development and government hospitals: Deduction of 2 times the actual amount paid, but not exceeding 10%% of net income.
+                16. (normal_donation) Normal donations: As actually paid, but not exceeding 10%% of net income
+                reference: https://www.kasikornbank.com/th/tax/pages/calculate_tax.aspx
+            """
+    
     def __init__(self):
         pass
     
     def calculate_tax(self, income: float, income_sources: list[str] = [],
-                      salary_per_month: float = 0.0, deductions: float = 0.0) -> dict[str, any]:
+                      salary_per_month: float = 0.0,
+                      deduction_list: dict[str, float] = {}) -> dict[str, any]:
+        
         # basic tax calculation for Thai tax system with normal salary income
-        print(income_sources)
         # basic income reduction 50% of income (max 100,000 THB)
         income_reduced = income - min(income * 0.5, 100_000)
+
+        deduction_list = self.validate_deduction_list(income, salary_per_month, deduction_list)
+        total_deduction = self.calculate_total_deduction(deduction_list)
+        income_reduced = max(0, income_reduced - total_deduction)
+
+        donation_deduction = self.calculate_donate_deduction(income_reduced, deduction_list)
+        income_reduced = max(0, income_reduced - donation_deduction)
+        print(income_reduced)
         flat_tax = self.calculate_flat_tax(income, salary_per_month)
         progessive_tax = self.calculate_progressive_tax(income_reduced)
 
@@ -27,9 +61,69 @@ class TaxCalculatorTool(Tool):
             "flat_tax": flat_tax,
             "progressive tax": progessive_tax,
             "income": income,
-            "deductions": deductions,
+            "deductions_list": deduction_list,
+            "deductions_total": min(income,total_deduction),
             "salary_per_month": salary_per_month,
         }
+    
+    def validate_deduction_list(self, income: float, salary_per_month: float, 
+                                deduction_list: dict[str, float]) -> dict[str, float]:
+        if not deduction_list:
+            return {}
+        
+        valid_deductions = {}
+        for k, v in deduction_list.items():
+            if k == "provident_fund":
+                valid_deductions[k] = min(v, salary_per_month * 12 * 0.15, 500_000)
+            elif k == "social_security_fund":
+                valid_deductions[k] = min(v, 9_000)
+            elif k == "hoam_loan_interest" or k == "life_insurance_premium" or k == "parent_health_insurance_premium":
+                valid_deductions[k] = min(v, 100_000)
+            elif k == "personal_health_insurance_premium":
+                valid_deductions[k] = min(v, 25_000)
+            elif k == "pension_insurance_premiums" or k == "government_pension_fund" or k == "private_teacher_fund":
+                valid_deductions[k] = min(v, income * 0.15, 200_000)
+            elif k == "national_savings_fund":
+                valid_deductions[k] = min(v, 13_200)
+            else:
+                valid_deductions[k] = v
+        
+        return valid_deductions
+
+    def calculate_donate_deduction(self, net_income: float, deduction_list: dict[str, float]) -> float:
+        if not deduction_list:
+            return 0.0
+        
+        total_donation = 0.0
+        special_donation = deduction_list.get("special_donation", 0)
+        normal_donation = deduction_list.get("normal_donation", 0)
+        total_donation += min(special_donation * 2, net_income * 0.1)
+        total_donation += min(normal_donation, net_income * 0.1)
+        return total_donation
+    
+    def calculate_total_deduction(self, deduction_list: dict[str, float]) -> float:
+        if not deduction_list:
+            return 0.0
+        total_deduction = 0.0
+        # pension_insurance_premiums, 
+        deduction_fund = 0.0
+        for k, v in deduction_list.items():
+            if k == "life_insurance_premium" or k == "personal_health_insurance_premium":
+                continue
+            if k == "pension_insurance_premiums" or k == "provident_fund" or k == "government_pension_fund" or k == "private_teacher_fund" \
+                or k == "national_savings_fund":
+                continue
+            total_deduction += v
+
+        # life insurance and health insurance premiums combined must not exceed 100,000 baht.
+        total_deduction += min(100_000, deduction_list.get("life_insurance_premium", 0) + deduction_list.get("personal_health_insurance_premium", 0 ))
+        
+        for k in ["pension_insurance_premiums", "provident_fund", "government_pension_fund", "private_teacher_fund", "national_savings_fund"]:
+            deduction_fund += deduction_list.get(k, 0)
+        # deduction fund must not exceed 500,000 baht.
+        deduction_fund = min(500_000, deduction_fund)
+        total_deduction += deduction_fund
+        return total_deduction
     
     def calculate_flat_tax(self, income: float, salary_per_month: float) -> float:
         tax_rate = 0.5 / 100 # 5% tax rate
@@ -110,13 +204,12 @@ class TaxCalculatorTool(Tool):
                             "type": "number",
                             "description": "The salary per month amount. Default is 0.0.",
                         },
-                        "deductions": {
-                            "type": "number",
-                            "description": "The total deductions amount. Default is 0.0.",
-                        },
+                        "deduction_list": {
+                            "type": "object",
+                            "description": f"If user provide you must or send None A dictionary of specific deductions and their amounts that user prompt in. You don't have to calculate % for me just sum them up\n\n Information {self.deduction_information}",
+                        }
                     },
-                    "required": ["income"],
-                    "additionalProperties": False
+                    "required": ["income", "deduction_list"],
                 }
             }
         ]
