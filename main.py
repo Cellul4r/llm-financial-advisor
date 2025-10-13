@@ -55,18 +55,22 @@ def display_chat_messages():
         image = message.get("image", None)
         
         if role == "assistant":
-            if image:
-                st.image(image, width=200)
             st.markdown(
                 f"""
                 <div style='text-align: left; background-color: #F0F0F0;
                             padding: 10px 15px; border-radius: 18px; margin: 4px 0; max-width: 70%;'>
                     {content}
                 </div>
-                <div style='text-align: left; color: #888; font-size: 13px;'>{timestamp}</div>
                 """,
                 unsafe_allow_html=True
             )
+
+            st.markdown(
+                f"""<div style='text-align: left; color: #888; font-size: 13px;'>{timestamp}</div>
+                """,
+                unsafe_allow_html=True
+            )
+        
         elif role == "user":
             st.markdown(
                 f"""
@@ -81,21 +85,23 @@ def display_chat_messages():
                 unsafe_allow_html=True
             )
 
+        if image:
+                st.image(image, width=250)
 
 
 # --- Global Singleton LLMClient ---
-_GLOBAL_LLM_CLIENT = None
+LLM_CLIENT = None
 
 def get_llm_client(model_name=None) -> LLMClient:
-    global _GLOBAL_LLM_CLIENT
+    global LLM_CLIENT
 
-    if _GLOBAL_LLM_CLIENT is None:
-        _GLOBAL_LLM_CLIENT = LLMClient(tool_executor=tool_executor)
+    if LLM_CLIENT is None:
+        LLM_CLIENT = LLMClient(tool_executor=tool_executor)
 
     if model_name:
-        _GLOBAL_LLM_CLIENT.set_model(model_name)
+        LLM_CLIENT.set_model(model_name)
 
-    return _GLOBAL_LLM_CLIENT
+    return LLM_CLIENT
 
 def main():
     st.set_page_config(
@@ -244,6 +250,7 @@ def main():
         }
         </style>
         """, unsafe_allow_html=True)
+        mode_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         if st.button("Financial Health Checkup"):
             st.session_state.current_mode = "health"
@@ -279,7 +286,7 @@ def main():
 
                 """
 
-            st.session_state.messages.append({"role": "assistant", "content": health_prompt, "image": "resource/img/tanny_present.png"})
+            st.session_state.messages.append({"role": "assistant", "content": health_prompt, "image": "resource/img/tanny_present.png", "timestamp": mode_time})
         
         if st.button("Best Banks for Saving"):
             st.session_state.current_mode = "banks"
@@ -323,7 +330,7 @@ def main():
                 - "Explain which bank is best for saving long-term."
 
                 """
-            st.session_state.messages.append({"role": "assistant", "content": banks_prompt, "image": "resource/img/tanny_present.png"})
+            st.session_state.messages.append({"role": "assistant", "content": banks_prompt, "image": "resource/img/tanny_present.png", "timestamp": mode_time})
         
         if st.button("Loan Calculator"):
             st.session_state.current_mode = "loan"
@@ -348,7 +355,7 @@ def main():
                 - "Calculate monthly payment for 200,000 dollar loan at 8% flat rate for 3 years."
                 """
 
-            st.session_state.messages.append({"role": "assistant", "content": loan_calculator_prompt, "image": "resource/img/tanny_present.png"})
+            st.session_state.messages.append({"role": "assistant", "content": loan_calculator_prompt, "image": "resource/img/tanny_present.png", "timestamp": mode_time})
             
         if st.button("Investments & Savings"):
             st.session_state.current_mode = "invest"
@@ -377,7 +384,7 @@ def main():
                 - "How should I diversify my portfolio with $50,000 in Thailand?"
                 - "Explain the difference between bonds and bond mutual funds and their expected returns."
                 """
-            st.session_state.messages.append({"role": "assistant", "content": investments_savings_prompt, "image": "resource/img/tanny_present.png"})
+            st.session_state.messages.append({"role": "assistant", "content": investments_savings_prompt, "image": "resource/img/tanny_present.png", "timestamp": mode_time})
             
         if st.button("Tax Calculator"):
             
@@ -402,7 +409,7 @@ def main():
                 - "Compare tax before and after investment deduction."
                 """
 
-            st.session_state.messages.append({"role": "assistant", "content": tax_calculator_prompt, "image": "resource/img/tanny_present.png"})
+            st.session_state.messages.append({"role": "assistant", "content": tax_calculator_prompt, "image": "resource/img/tanny_present.png", "timestamp": mode_time})
 
         st.markdown("""
         - **Category** is used when the user wants to choose a specific mode to ask questions related to that topic.
@@ -429,19 +436,13 @@ def main():
         st.markdown("### 📚 About")
         st.markdown(" ")
         st.markdown("""
-        This Financial Advisor chat app demonstrates:
+        **Welcome to Financial AI Advisor**:
+        
+        a chat-based platform designed to help you manage and understand your personal finances:
+        Through conversation, you can ask questions, explore financial topics, and get instant, easy-to-understand answers.
 
-        - Intelligent financial guidance using LiteLLM
-        - Interactive Streamlit chat interface
-        - Real-time financial health checks and tool integration
-        - Session state management for conversation history
-        - Customizable model settings (temperature, max tokens)
-
-        **For Students / Developers:**
-        - Extend with additional financial tools
-        - Customize prompts and assistant behavior
-        - Persist chat history for long-term financial planning
-        - Stream assistant responses for real-time feedback
+        The assistant responds naturally to your questions, guiding you step by step so you can make confident and informed financial decisions 
+        - all within a single, conversational space
         """)
 
 
@@ -581,7 +582,7 @@ def input_user(prompt: str):
     )
         
     # with st.chat_message("assistant"): ทำให้หน้าbot กล่องข้อความมันหาย
-    st.image("resource/img/tanny_think.png", width=200)  
+    st.image("resource/img/tanny_think.png", width=250)  
     with st.spinner("Tanny is considering..."):
         # Prepare messages for LLM
 
